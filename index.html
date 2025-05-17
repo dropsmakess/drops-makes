@@ -15,7 +15,7 @@
     }
 
     .tarja-topo {
-      background-color: #4b0082; /* Roxo escuro */
+      background-color: #4b0082;
       color: #000;
       padding: 1rem;
       text-align: center;
@@ -71,6 +71,47 @@
       font-size: 2rem;
       text-align: center;
       text-decoration: none;
+      z-index: 1000;
+    }
+
+    .carrinho {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background-color: #1f1f2e;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+
+    .carrinho h3 {
+      margin-top: 0;
+    }
+
+    .carrinho-item {
+      border-bottom: 1px solid #555;
+      padding: 0.3rem 0;
+    }
+
+    .carrinho-total {
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+
+    .finalizar {
+      background-color: #25d366;
+      border: none;
+      padding: 0.5rem;
+      width: 100%;
+      border-radius: 5px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -78,88 +119,97 @@
 
   <div class="tarja-topo">Drops Makes ☂️</div>
 
-  <section class="produtos">
-    <div class="produto">
-      <h3>God Glider</h3>
-      <p>R$ 17,00 - Um planador poderoso para dominar o jogo.</p>
-      <button onclick="alert('Pagamento via PIX - God Glider: R$17,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Rota de Loot</h3>
-      <p>R$ 14,99 - Melhore sua rota para pegar os melhores itens.</p>
-      <button onclick="alert('Pagamento via PIX - Rota de Loot: R$14,99')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Estratégias / Meta</h3>
-      <p>R$ 18,99 - Estratégias avançadas para subir no ranking.</p>
-      <button onclick="alert('Pagamento via PIX - Estratégias / Meta: R$18,99')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Pack Solo</h3>
-      <p>R$ 29,99 - Pacote completo para quem joga solo.</p>
-      <button onclick="alert('Pagamento via PIX - Pack Solo: R$29,99')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Pack Console Cup Duos</h3>
-      <p>R$ 29,99 - Ideal para duplas em campeonatos de console.</p>
-      <button onclick="alert('Pagamento via PIX - Pack Console Cup Duos: R$29,99')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Pack Trio Básico</h3>
-      <p>R$ 33,00 - Estratégias básicas para trios iniciantes.</p>
-      <button onclick="alert('Pagamento via PIX - Pack Trio Básico: R$33,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Pack Trio Avançado</h3>
-      <p>R$ 44,99 - Estratégias avançadas para trios experientes.</p>
-      <button onclick="alert('Pagamento via PIX - Pack Trio Avançado: R$44,99')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Pack Trio Cocheado</h3>
-      <p>R$ 79,99 - Trio com coaching profissional incluso.</p>
-      <button onclick="alert('Pagamento via PIX - Pack Trio Cocheado: R$79,99')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>2 God Gliders</h3>
-      <p>R$ 30,00 - Dois planadores para você e seu duo.</p>
-      <button onclick="alert('Pagamento via PIX - 2 God Gliders: R$30,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>God Glider + Rota de Loot</h3>
-      <p>R$ 28,00 - Combo ideal para dominar a partida.</p>
-      <button onclick="alert('Pagamento via PIX - God Glider + Rota de Loot: R$28,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>God Glider + Rota + Estratégias</h3>
-      <p>R$ 45,00 - O pacote completo para melhorar no jogo.</p>
-      <button onclick="alert('Pagamento via PIX - God Glider + Rota + Estratégias: R$45,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>God Glider + Estratégias</h3>
-      <p>R$ 33,00 - Planador e táticas para vencer mais partidas.</p>
-      <button onclick="alert('Pagamento via PIX - God Glider + Estratégias: R$33,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>Rota de Loot + Estratégias</h3>
-      <p>R$ 30,00 - Rota eficiente com as melhores estratégias.</p>
-      <button onclick="alert('Pagamento via PIX - Rota de Loot + Estratégias: R$30,00')">Pagar com PIX</button>
-    </div>
+  <div class="carrinho" id="carrinho">
+    <h3>🛒 Carrinho</h3>
+    <div id="carrinho-itens"></div>
+    <div class="carrinho-total" id="carrinho-total">Total: R$ 0,00</div>
+    <button class="finalizar" onclick="finalizarCompra()">Finalizar Compra</button>
+  </div>
 
-    <!-- Novos Produtos VOD -->
-    <div class="produto">
-      <h3>VOD 1 hora</h3>
-      <p>R$ 35,00 - Análise personalizada de 1 hora da sua gameplay.</p>
-      <button onclick="alert('Pagamento via PIX - VOD 1 hora: R$35,00')">Pagar com PIX</button>
-    </div>
-    <div class="produto">
-      <h3>VOD 2 horas</h3>
-      <p>R$ 50,00 - Análise detalhada de 2 horas da sua gameplay.</p>
-      <button onclick="alert('Pagamento via PIX - VOD 2 horas: R$50,00')">Pagar com PIX</button>
-    </div>
-
+  <section class="produtos" id="produtos">
+    <!-- Produtos são gerados pelo JS -->
   </section>
 
   <a href="https://wa.me/SEUNUMERO" target="_blank" class="whatsapp">💬</a>
 
+  <script>
+    const produtos = [
+      { nome: "God Glider", preco: 17 },
+      { nome: "Rota de Loot", preco: 14.99 },
+      { nome: "Estratégias / Meta", preco: 18.99 },
+      { nome: "Pack Solo", preco: 29.99 },
+      { nome: "Pack Console Cup Duos", preco: 29.99 },
+      { nome: "Pack Trio Básico", preco: 33 },
+      { nome: "Pack Trio Avançado", preco: 44.99 },
+      { nome: "Pack Trio Cocheado", preco: 79.99 },
+      { nome: "2 God Gliders", preco: 30 },
+      { nome: "God Glider + Rota de Loot", preco: 28 },
+      { nome: "God Glider + Rota + Estratégias", preco: 45 },
+      { nome: "God Glider + Estratégias", preco: 33 },
+      { nome: "Rota de Loot + Estratégias", preco: 30 },
+      { nome: "VOD 1 hora", preco: 35 },
+      { nome: "VOD 2 horas", preco: 50 }
+    ];
+
+    const carrinho = [];
+
+    function atualizarCarrinho() {
+      const carrinhoItens = document.getElementById('carrinho-itens');
+      const carrinhoTotal = document.getElementById('carrinho-total');
+      carrinhoItens.innerHTML = '';
+      let total = 0;
+
+      carrinho.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'carrinho-item';
+        div.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+        carrinhoItens.appendChild(div);
+        total += item.preco;
+      });
+
+      carrinhoTotal.textContent = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function adicionarAoCarrinho(nome, preco) {
+      carrinho.push({ nome, preco });
+      atualizarCarrinho();
+    }
+
+    function finalizarCompra() {
+      if (carrinho.length === 0) {
+        alert("Seu carrinho está vazio.");
+        return;
+      }
+
+      let mensagem = "Olá! Quero comprar os seguintes produtos:\n\n";
+      let total = 0;
+
+      carrinho.forEach(item => {
+        mensagem += `- ${item.nome} (R$ ${item.preco.toFixed(2)})\n`;
+        total += item.preco;
+      });
+
+      mensagem += `\nTotal: R$ ${total.toFixed(2)}\n`;
+      const link = `https://wa.me/SEUNUMERO?text=${encodeURIComponent(mensagem)}`;
+      window.open(link, '_blank');
+    }
+
+    function gerarProdutos() {
+      const container = document.getElementById('produtos');
+      produtos.forEach(prod => {
+        const div = document.createElement('div');
+        div.className = 'produto';
+        div.innerHTML = `
+          <h3>${prod.nome}</h3>
+          <p>R$ ${prod.preco.toFixed(2)}</p>
+          <button onclick="adicionarAoCarrinho('${prod.nome}', ${prod.preco})">Adicionar ao Carrinho</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    gerarProdutos();
+  </script>
 </body>
 </html>
+
