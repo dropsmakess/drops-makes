@@ -15,7 +15,7 @@
     }
 
     .tarja-topo {
-      background-color: #a066ff;
+      background-color: #4b0082; /* Roxo escuro */
       color: #000;
       padding: 1rem;
       text-align: center;
@@ -32,7 +32,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
-      padding: 6rem 2rem 2rem; /* espaço no topo para não ficar atrás da tarja */
+      padding: 6rem 2rem 2rem;
     }
 
     .produto {
@@ -76,10 +76,8 @@
 </head>
 <body>
 
-  <!-- Tarja Fixa -->
   <div class="tarja-topo">Drops Makes ☂️</div>
 
-  <!-- Produtos -->
   <section class="produtos">
     <div class="produto">
       <h3>God Glider</h3>
@@ -146,11 +144,22 @@
       <p>R$ 30,00 - Rota eficiente com as melhores estratégias.</p>
       <button onclick="alert('Pagamento via PIX - Rota de Loot + Estratégias: R$30,00')">Pagar com PIX</button>
     </div>
+
+    <!-- Novos Produtos VOD -->
+    <div class="produto">
+      <h3>VOD 1 hora</h3>
+      <p>R$ 35,00 - Análise personalizada de 1 hora da sua gameplay.</p>
+      <button onclick="alert('Pagamento via PIX - VOD 1 hora: R$35,00')">Pagar com PIX</button>
+    </div>
+    <div class="produto">
+      <h3>VOD 2 horas</h3>
+      <p>R$ 50,00 - Análise detalhada de 2 horas da sua gameplay.</p>
+      <button onclick="alert('Pagamento via PIX - VOD 2 horas: R$50,00')">Pagar com PIX</button>
+    </div>
+
   </section>
 
-  <!-- Botão WhatsApp -->
   <a href="https://wa.me/SEUNUMERO" target="_blank" class="whatsapp">💬</a>
 
 </body>
 </html>
-
