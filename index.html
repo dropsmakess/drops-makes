@@ -1,4 +1,11 @@
+Aqui está o código completo do seu site **MV Drops** com:
 
+* Painel de administrador (login `adm.admin.com`) para adicionar produtos
+* Botão Pix que gera QR Code real via a chave `viniam.1413@gmail.com` e nome "MV Drops"
+
+---
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -202,12 +209,73 @@
       font-weight: bold;
       font-size: 1rem;
     }
-    footer {
-      text-align: center;
+    .pay-button:hover {
+      background-color: #6f00ff;
+    }
+    /* Painel admin */
+    #adminPanel {
+      background-color: #2a2a3a;
       padding: 20px;
-      background-color: #141414cc;
-      color: #777;
-      margin-top: 40px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      color: #d0aaff;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #adminPanel h2 {
+      margin-top: 0;
+    }
+    #adminPanel input, #adminPanel select {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+    #adminPanel button {
+      background-color: #6f00ff;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      font-size: 1rem;
+    }
+    #adminPanel button:hover {
+      background-color: #8b33ff;
+    }
+    /* QR Pix */
+    #pixSection {
+      margin-top: 20px;
+      text-align: center;
+      color: #d0aaff;
+    }
+    #pixQR {
+      margin-top: 10px;
+      max-width: 220px;
+      border: 2px solid #6f00ff;
+      border-radius: 12px;
+      padding: 10px;
+      background: #1a1a1fcc;
+      display: inline-block;
+    }
+    /* Responsividade */
+    @media (max-width: 600px) {
+      nav {
+        gap: 10px;
+      }
+      .cart {
+        width: 90vw;
+        max-height: 50vh;
+        right: 5%;
+      }
+      #adminPanel {
+        max-width: 90vw;
+      }
     }
   </style>
 </head>
@@ -226,26 +294,57 @@
     <button onclick="login()">Entrar</button>
   </div>
 
-  <div class="auth" id="welcomeSection" style="display:none;">
-    Bem-vindo, <span id="userEmail"></span>!
-    <button onclick="logout()">Sair</button>
+  <div class="auth" id="welcomeSection" style="display:none; align-items:center; gap:15px;">
+    <span>Bem-vindo, <strong><span id="userEmail"></span></strong>!</span>
+    <button onclick="logout()" style="background-color:#9000ff; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">Sair</button>
   </div>
 
   <div class="container">
+
+    <!-- Painel Admin -->
+    <div id="adminPanel" style="display:none;">
+      <h2>Painel do Administrador</h2>
+      <input type="text" id="newName" placeholder="Nome do Produto" />
+      <input type="text" id="newDesc" placeholder="Descrição" />
+      <input type="text" id="newPrice" placeholder="Preço (ex: R$ 35,00)" />
+      <select id="newCategory">
+        <option value="outros">Outros</option>
+        <option value="mouse">Mouse</option>
+        <option value="teclado">Teclado</option>
+        <option value="headset">Headset</option>
+      </select>
+      <button onclick="addProduct()">Adicionar Produto</button>
+    </div>
+
     <div class="product-grid" id="productGrid"></div>
+
   </div>
 
   <div class="cart">
-    <h3>Carrinho <span class="cart-count" id="cartCount">0</span></h3>
+    <h3>
+      Carrinho <span class="cart-count" id="cartCount">0</span>
+    </h3>
     <ul class="cart-items" id="cartItems"></ul>
-    <button class="pay-button" onclick="pagar()">Finalizar Compra</button>
+    <button class="pay-button" onclick="togglePix()">Finalizar Compra via Pix</button>
+
+    <div id="pixSection" style="display:none;">
+      <p><strong>Escaneie o QR Code Pix abaixo para pagar:</strong></p>
+      <div id="pixQR"></div>
+      <p id="pixTotal"></p>
+      <button style="margin-top:10px; background:#9000ff; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;" onclick="fecharPix()">Fechar</button>
+    </div>
   </div>
 
   <footer>
     <p>&copy; 2025 MV Drops — Todos os direitos reservados.</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
+    const adminEmail = 'adm.admin.com';
+    const pixKey = 'viniam.1413@gmail.com';
+    const pixReceiverName = 'MV Drops';
+
     const products = [
       { name: 'God Glider', desc: 'Ferramenta essencial para players avançados.', price: 'R$ 15,00', category: 'outros' },
       { name: 'Rota de Loot', desc: 'Mapeamento eficiente para loot ideal.', price: 'R$ 17,00', category: 'outros' },
@@ -268,7 +367,22 @@
     const authSection = document.getElementById('authSection');
     const welcomeSection = document.getElementById('welcomeSection');
     const userEmailSpan = document.getElementById('userEmail');
+    const adminPanel = document.getElementById('adminPanel');
+    const pixSection = document.getElementById('pixSection');
+    const pixQR = document.getElementById('pixQR');
+    const pixTotal = document.getElementById('pixTotal');
+
     let cart = {};
+
+    // Helper para converter preço string "R$ xx,xx" para número float
+    function parsePrice(str) {
+      return parseFloat(str.replace(/[R$\s\.]/g, '').replace(',', '.'));
+    }
+
+    // Helper para formatar número para "R$ xx,xx"
+    function formatPrice(num) {
+      return 'R$ ' + num.toFixed(2).replace('.', ',');
+    }
 
     function renderProducts(filter) {
       productGrid.innerHTML = '';
@@ -338,6 +452,7 @@
         alert('Preencha todos os campos.');
         return;
       }
+      // Login simples: só checa o email para admin, não senha
       localStorage.setItem('mvUserEmail', email);
       alert('Login efetuado com sucesso! Bem-vindo, ' + email);
       updateLoginStatus();
@@ -349,10 +464,17 @@
         authSection.style.display = 'none';
         welcomeSection.style.display = 'flex';
         userEmailSpan.textContent = email;
+        // Mostrar painel admin se for admin
+        if (email === adminEmail) {
+          adminPanel.style.display = 'block';
+        } else {
+          adminPanel.style.display = 'none';
+        }
       } else {
         authSection.style.display = 'flex';
         welcomeSection.style.display = 'none';
         userEmailSpan.textContent = '';
+        adminPanel.style.display = 'none';
       }
     }
 
@@ -360,26 +482,12 @@
       localStorage.removeItem('mvUserEmail');
       alert('Você saiu da conta.');
       updateLoginStatus();
+      pixSection.style.display = 'none';
     }
 
-    function pagar() {
-      const items = Object.entries(cart);
-      if (items.length === 0) {
-        alert('Carrinho vazio.');
-        return;
-      }
-      let message = 'Compra realizada com sucesso:\n';
-      items.forEach(([name, qty]) => {
-        message += `${name} — Quantidade: ${qty}\n`;
-      });
-      alert(message);
-      cart = {};
-      renderCart();
-    }
+    function addProduct() {
+      const name = document.getElementById('newName').value.trim();
+      const desc = document.getElementById('newDesc').value.trim();
+     
+```
 
-    renderProducts('all');
-    renderCart();
-    updateLoginStatus();
-  </script>
-</body>
-</html>
