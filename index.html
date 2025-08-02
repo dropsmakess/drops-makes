@@ -480,3 +480,124 @@
     function addProduct() {
       const name = document.getElementById('newName').value.trim();
       const desc = document.getElementById('newDesc').value.trim();
+      const price = document.getElementById('newPrice').value.trim();
+      const category = document.getElementById('newCategory').value;
+
+      if (!name || !desc || !price) {
+        alert('Preencha todos os campos do produto.');
+        return;
+      }
+      products.push({ name, desc, price, category });
+      alert('Produto adicionado com sucesso!');
+      renderProducts('all');
+
+      // Limpar inputs
+      document.getElementById('newName').value = '';
+      document.getElementById('newDesc').value = '';
+      document.getElementById('newPrice').value = '';
+      document.getElementById('newCategory').value = 'outros';
+    }
+
+    function togglePix() {
+      if (Object.keys(cart).length === 0) {
+        alert('Carrinho vazio.');
+        return;
+      }
+      if (pixSection.style.display === 'none') {
+        gerarPix();
+        pixSection.style.display = 'block';
+      } else {
+        pixSection.style.display = 'none';
+      }
+    }
+
+    function fecharPix() {
+      pixSection.style.display = 'none';
+    }
+
+    // Gera o payload Pix para o QR code com padrão BRCode simples
+    // https://www.bb.com.br/docs/pub/Manual%20PIX%20Cobran%C3%A7a%20QR%20Code%20-%20v2.0.pdf
+    function gerarPix() {
+      let total = 0;
+      for (const [name, qty] of Object.entries(cart)) {
+        const prod = products.find(p => p.name === name);
+        if (prod) {
+          total += parsePrice(prod.price) * qty;
+        }
+      }
+      pixTotal.textContent = `Valor total: ${formatPrice(total)}`;
+
+      // Montar payload Pix
+      // Campos simplificados:
+      // 00 - Payload Format Indicator
+      // 01 - Point of Initiation Method (12 para valor fixo)
+      // 26 - Merchant Account Information (GUI + chave Pix)
+      // 52 - Merchant Category Code (0000 = default)
+      // 53 - Currency (986 = BRL)
+      // 54 - Transaction Amount
+      // 58 - Country Code (BR)
+      // 59 - Merchant Name
+      // 60 - Merchant City (usando "Sao Paulo" fixo)
+      // 62 - Additional Data Field Template (TXID)
+      // 63 - CRC (calculado ao final)
+
+      function tlv(id, value) {
+        const len = value.length.toString().padStart(2, '0');
+        return id + len + value;
+      }
+
+      function calculateCRC(payload) {
+        const POLYNOMIAL = 0x1021;
+        let crc = 0xFFFF;
+        const bytes = Array.from(payload).map(c => c.charCodeAt(0));
+        for (const b of bytes) {
+          crc ^= (b << 8);
+          for (let i = 0; i < 8; i++) {
+            if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ POLYNOMIAL;
+            else crc <<= 1;
+            crc &= 0xFFFF;
+          }
+        }
+        return crc.toString(16).toUpperCase().padStart(4, '0');
+      }
+
+      const gui = 'BR.GOV.BCB.PIX';
+      const merchantAccountInfo = tlv('00', gui) + tlv('01', pixKey);
+      const merchantCategoryCode = '0000';
+      const currency = '986';
+      const transactionAmount = total.toFixed(2);
+      const countryCode = 'BR';
+      const merchantName = pixReceiverName.toUpperCase().slice(0,25);
+      const merchantCity = 'SAO PAULO';
+      const txid = '***'; // opcional, pode ser algo fixo ou gerado
+
+      let payload = '';
+      payload += tlv('00', '01');
+      payload += tlv('01', '12');
+      payload += tlv('26', merchantAccountInfo);
+      payload += tlv('52', merchantCategoryCode);
+      payload += tlv('53', currency);
+      payload += tlv('54', transactionAmount);
+      payload += tlv('58', countryCode);
+      payload += tlv('59', merchantName);
+      payload += tlv('60', merchantCity);
+      payload += tlv('62', tlv('05', 'TXID') + tlv('04', txid));
+      payload += '6304'; // CRC campo e tamanho, para cálculo
+
+      const crc = calculateCRC(payload);
+      payload += crc;
+
+      // Gerar QR Code
+      pixQR.innerHTML = '';
+      QRCode.toCanvas(pixQR, payload, { width: 220 }, function (error) {
+        if (error) console.error(error);
+      });
+    }
+
+    // Inicialização
+    renderProducts('all');
+    renderCart();
+    updateLoginStatus();
+  </script>
+</body>
+</html>
